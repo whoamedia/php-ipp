@@ -1972,12 +1972,12 @@ class BasicIPP
 
 		if ($this->log_type == 0)
 		{
-			error_log($string);
+			\Log::info($string);
 			return;
 		}
 
 		$string = sprintf("%s %s Host %s:%s user %s : %s\n", date('M d H:i:s'), basename($_SERVER['PHP_SELF']), $this->host, $this->port, $this->requesting_user, $string_to_log);
-		error_log($string, $this->log_type, $this->log_destination);
+		\Log::error($string . ' | ' . $this->log_type . ' | ' . $this->log_destination);
 		return;
 	}
 }
