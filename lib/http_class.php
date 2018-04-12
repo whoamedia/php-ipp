@@ -372,35 +372,35 @@ class http_class
 		$content_length = 0;
 		foreach ($this->arguments["BodyStream"] as $argument)
 		{
-			list ($type, $value) = each($argument);
-			reset($argument);
-			if ($type == "Data")
-			{
-				$length = strlen($value);
-			}
-			elseif ($type == "File")
-			{
-				if (is_readable($value))
-				{
-					$length = filesize($value);
-				}
-				else
-				{
-					$length = 0;
-					return
-						$this->_HttpError(sprintf(_("%s: file is not readable"), $value),
-							E_USER_WARNING);
-				}
-			}
-			else
-			{
-				$length = 0;
-				return
-					$this->_HttpError(sprintf
-						(_("%s: not a valid argument for content"), $type),
-						E_USER_WARNING);
-			}
-			$content_length += $length;
+		    foreach ($argument as $type => $value) {
+                if ($type == "Data")
+                {
+                    $length = strlen($value);
+                }
+                elseif ($type == "File")
+                {
+                    if (is_readable($value))
+                    {
+                        $length = filesize($value);
+                    }
+                    else
+                    {
+                        $length = 0;
+                        return
+                            $this->_HttpError(sprintf(_("%s: file is not readable"), $value),
+                                E_USER_WARNING);
+                    }
+                }
+                else
+                {
+                    $length = 0;
+                    return
+                        $this->_HttpError(sprintf
+                        (_("%s: not a valid argument for content"), $type),
+                            E_USER_WARNING);
+                }
+                $content_length += $length;
+            }
 		}
 		$this->request_body = sprintf(_("%s Bytes"), $content_length);
 		$this->headers["Content-Length"] = $content_length;
@@ -439,44 +439,35 @@ class http_class
 		}
 		foreach ($this->arguments["BodyStream"] as $argument)
 		{
-			list ($type, $value) = each($argument);
-			reset($argument);
-			if ($type == "Data")
-			{
-				$streamed_length = 0;
-				while ($streamed_length < strlen($value))
-				{
-					$string = substr($value, $streamed_length, $this->window_size);
-					if (!$this->_streamString($string))
-					{
-						return $this->_HttpError(_("error while sending body data"),
-							E_USER_WARNING);
-					}
-					$streamed_length += $this->window_size;
-				}
-			}
-			elseif ($type == "File")
-			{
-				if (is_readable($value))
-				{
-					$file = fopen($value, 'rb');
-					while (!feof($file))
-					{
-						if (gettype($block = @fread($file, $this->window_size)) !=
-							"string"
-						)
-						{
-							return $this->_HttpError(_("cannot read file to upload"),
-								E_USER_WARNING);
-						}
-						if (!$this->_streamString($block))
-						{
-							return $this->_HttpError(_("error while sending body data"),
-								E_USER_WARNING);
-						}
-					}
-				}
-			}
+            foreach ($argument as $type => $value) {
+                if ($type == "Data") {
+                    $streamed_length = 0;
+                    while ($streamed_length < strlen($value)) {
+                        $string = substr($value, $streamed_length, $this->window_size);
+                        if (!$this->_streamString($string)) {
+                            return $this->_HttpError(_("error while sending body data"),
+                                E_USER_WARNING);
+                        }
+                        $streamed_length += $this->window_size;
+                    }
+                } elseif ($type == "File") {
+                    if (is_readable($value)) {
+                        $file = fopen($value, 'rb');
+                        while (!feof($file)) {
+                            if (gettype($block = @fread($file, $this->window_size)) !=
+                                "string"
+                            ) {
+                                return $this->_HttpError(_("cannot read file to upload"),
+                                    E_USER_WARNING);
+                            }
+                            if (!$this->_streamString($block)) {
+                                return $this->_HttpError(_("error while sending body data"),
+                                    E_USER_WARNING);
+                            }
+                        }
+                    }
+                }
+            }
 		}
 		return array(true, "success");
 	}
